@@ -407,14 +407,38 @@ main {
   transform: rotate(-18deg);
 }
 
-.hero-character {
+.hero-character-switcher {
   position: absolute;
   inset: 50% auto auto 50%;
   z-index: 3;
   width: min(78%, 390px);
+  padding: 0;
+  border: 0;
+  background: transparent;
   transform: translate(-50%, -50%) rotate(-4deg);
   animation: hero-bob 3.8s ease-in-out infinite;
   filter: drop-shadow(7px 9px 0 var(--border));
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hero-character-switcher:focus-visible {
+  outline: 4px solid var(--accent);
+  outline-offset: 5px;
+  border-radius: 44%;
+}
+
+.hero-character {
+  display: block;
+  width: 100%;
+}
+
+.hero-character-switcher.is-switching .hero-character {
+  animation: hero-character-out 170ms ease-in both;
+}
+
+.hero-character-switcher.is-entering .hero-character {
+  animation: hero-character-in 340ms cubic-bezier(0.2, 0.9, 0.25, 1.2) both;
 }
 
 .floating-hold {
@@ -1054,6 +1078,15 @@ main {
   50% { transform: translate(-50%, -50%) rotate(-1deg) translateY(-10px); }
 }
 
+@keyframes hero-character-out {
+  to { opacity: 0; transform: scale(0.72) rotate(9deg); }
+}
+
+@keyframes hero-character-in {
+  from { opacity: 0; transform: scale(0.68) rotate(-12deg); }
+  to { opacity: 1; transform: scale(1) rotate(0); }
+}
+
 @keyframes floaty {
   0%, 100% { translate: 0 0; rotate: -3deg; }
   50% { translate: 0 -12px; rotate: 3deg; }
@@ -1177,7 +1210,7 @@ main {
     display: none;
   }
 
-  .hero-character {
+  .hero-character-switcher {
     width: 144px;
   }
 

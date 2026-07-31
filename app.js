@@ -40,6 +40,21 @@
   };
 
   const metricColors = ['--accent', '--purple', '--blue', '--green'];
+  const heroRotationIds = [
+    'sloper',
+    'jug',
+    'pocket',
+    'volume',
+    'crimp',
+    'pinch',
+    'rough',
+    'smooth',
+    'undercling',
+    'edge',
+    'foothold',
+    'textured',
+    'pin'
+  ];
 
   function clearTimers() {
     state.timers.forEach((timer) => window.clearTimeout(timer));
@@ -139,6 +154,48 @@
     app.focus({ preventScroll: true });
   }
 
+  function initHeroCharacterRotation() {
+    const switcher = document.querySelector('#heroCharacterSwitcher');
+    if (!switcher) return;
+
+    let currentIndex = 0;
+    let isSwitching = false;
+
+    const showNextCharacter = () => {
+      if (isSwitching || state.view !== 'home') return;
+      isSwitching = true;
+      switcher.classList.remove('is-entering');
+      switcher.classList.add('is-switching');
+
+      schedule(() => {
+        currentIndex = (currentIndex + 1) % heroRotationIds.length;
+        const nextResult = getResult(heroRotationIds[currentIndex]);
+        switcher.innerHTML = renderHold(nextResult, 'hero-character');
+        switcher.dataset.resultId = nextResult.id;
+        switcher.classList.remove('is-switching');
+        switcher.classList.add('is-entering');
+        schedule(() => {
+          switcher.classList.remove('is-entering');
+          isSwitching = false;
+        }, 360);
+      }, 170);
+    };
+
+    const queueNextCharacter = () => {
+      schedule(() => {
+        if (state.view !== 'home') return;
+        if (!document.hidden) showNextCharacter();
+        queueNextCharacter();
+      }, 2300);
+    };
+
+    switcher.addEventListener('click', () => showNextCharacter());
+
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      queueNextCharacter();
+    }
+  }
+
   function renderHome() {
     clearTimers();
     state.view = 'home';
@@ -158,9 +215,11 @@
           <button class="button" id="startButton" type="button">开始上墙 <span aria-hidden="true">→</span></button>
           <div class="hero-meta"><span class="badge">约 2 分钟</span><span class="badge">无需登录</span><span class="badge">毒，但不乱骂</span></div>
         </div>
-        <div class="hero-stage" aria-hidden="true">
+        <div class="hero-stage">
           <div class="hero-wall"></div>
-          ${renderHold(hero, 'hero-character')}
+          <button class="hero-character-switcher" id="heroCharacterSwitcher" type="button" data-result-id="${hero.id}" aria-label="换一个岩点形象">
+            ${renderHold(hero, 'hero-character')}
+          </button>
           ${renderHold(floatOne, 'floating-hold one')}
           ${renderHold(floatTwo, 'floating-hold two')}
           ${renderHold(floatThree, 'floating-hold three')}
@@ -175,6 +234,7 @@
       burst(event.currentTarget);
       startQuiz();
     });
+    initHeroCharacterRotation();
     focusApp();
   }
 
